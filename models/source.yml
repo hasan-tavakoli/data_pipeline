@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: hu-data-staging
+    schema: bronze
+    tables:
+      - name: raw_currency_exchange
+        identifier: CurrencyExchange 
+        description: "Table containing currency exchange data"
+      - name: raw_game 
+        identifier: Game
+        description: "Table containing game information"
+      - name: raw_game_category
+        identifier: GameCategory
+        description: "Table containing game category information"
+      - name: raw_game_provider 
+        identifier: GameProvider
+        description: "Table containing game provider information"
+      - name: raw_game_transaction 
+        identifier: GameTransaction
+        description: "Table containing game transaction data"
+      - name: raw_player 
+        identifier: Player
+        description: "Table containing player data"
