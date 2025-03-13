@@ -4,16 +4,16 @@
         on_schema_change='fail'
     )
 }}
-
+{{ log_message('Starting execution of fact_bet model.', level='info') }}
 WITH game_transaction_currency AS (
     SELECT
         t.transaction_date,
         t.player_id,
         t.game_id,
-        CASE WHEN t.transaction_type = 'WAGER' THEN (t.real_amount * c.base_rate_euro) ELSE 0 END AS cash_turnover,
-        CASE WHEN t.transaction_type = 'WAGER' THEN (t.bonus_amount * c.base_rate_euro) ELSE 0 END AS bonus_turnover,
-        CASE WHEN t.transaction_type = 'RESULT' THEN (t.real_amount * c.base_rate_euro) ELSE 0 END AS cash_winnings,
-        CASE WHEN t.transaction_type = 'RESULT' THEN (t.bonus_amount * c.base_rate_euro) ELSE 0 END AS bonus_winnings
+        CASE WHEN t.transaction_type = 'WAGER' THEN  COALESCE((t.real_amount * c.base_rate_euro),0) ELSE 0 END AS cash_turnover,
+        CASE WHEN t.transaction_type = 'WAGER' THEN  COALESCE((t.bonus_amount * c.base_rate_euro),0) ELSE 0 END AS bonus_turnover,
+        CASE WHEN t.transaction_type = 'RESULT' THEN  COALESCE((t.real_amount * c.base_rate_euro),0) ELSE 0 END AS cash_winnings,
+        CASE WHEN t.transaction_type = 'RESULT' THEN  COALESCE((t.bonus_amount * c.base_rate_euro),0) ELSE 0 END AS bonus_winnings
     FROM {{ ref('src_currency_exchange') }} AS c
     JOIN {{ ref('src_game_transaction') }} AS t
         ON c.exchange_currency = t.transaction_currency
@@ -78,11 +78,13 @@ SELECT
 FROM final
 {% if is_incremental() %}
     {% if var("start_date", False) and var("end_date", False) %}
-        {{ log('Loading ' ~ this ~ ' incrementally (start_date: ' ~ var("start_date") ~ ', end_date: ' ~ var("end_date") ~ ')', info=True) }}
+        {{ log_message('Loading ' ~ this ~ ' incrementally (start_date: ' ~ var("start_date") ~ ', end_date: ' ~ var("end_date") ~ ')', level='info') }}
         WHERE transaction_date >= '{{ var("start_date") }}'
         AND transaction_date < '{{ var("end_date") }}'
     {% else %}
-        {{ log('Loading ' ~ this ~ ' incrementally (all missing dates)', info=True)}}
+        {{ log_message('Loading ' ~ this ~ ' incrementally (all missing dates)', level='info')}}
         WHERE transaction_date > (SELECT MAX(transaction_date) FROM {{ this }})
     {% endif %}
 {% endif %}
+
+{{ log_message('Finished execution of fact_bet model.', level='info') }}

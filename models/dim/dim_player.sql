@@ -1,14 +1,15 @@
 {{ config(materialized='table')}}
 
+{{ log_message('Starting execution of dim_player model.', level='info') }}
 WITH ranked_players AS (
     SELECT
-        playerID AS player_id,
-        gender AS gender,
-        country AS country,
-        latestUpdate AS latest_update,
-        ROW_NUMBER() OVER (PARTITION BY playerID ORDER BY latestUpdate DESC) AS rn
+        player_id,
+        player_gender AS gender,
+        player_country AS country,
+        latest_update,
+        ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY latest_update DESC) AS rn
     FROM
-        {{ source('bronze', 'raw_player') }}
+        {{ ref('src_player') }}
 )
 SELECT
     player_id,
@@ -19,3 +20,6 @@ FROM
     ranked_players
 WHERE
     rn = 1
+
+
+{{ log_message('Finished execution of dim_player model.', level='info') }}

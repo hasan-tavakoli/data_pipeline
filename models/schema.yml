@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: dim_game
+    description: "A dimension table containing game details."
+    columns:
+      - name: game_id
+        description: "Primary key for the game."
+        tests:
+          - not_null
+          - unique
+  - name: dim_player
+    description: "A dimension table containing player details, with only the latest update."
+    columns:
+      - name: player_id
+        description: "Primary key for the player."
+        tests:
+          - not_null
+          - unique
+      - name: latest_update
+        description: "Latest update timestamp for the player."
+        tests:
+          - not_null
+    
+  - name: fact_bet
+    description: "A fact table containing bet transaction details."
+    columns:
+      - name: date
+        description: "Transaction date."
+        tests:
+          - not_null
+      - name: player_id
+        description: "Foreign key referencing dim_player."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_player')
+              field: player_id
+      - name: game_id
+        description: "Foreign key referencing dim_game."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_game')
+              field: game_id
+      - name: "`Cash turnover`"
+        description: "Wagered amount in cash."
+        tests:
+          - positive_value
+      - name: "`Bonus turnover`"
+        description: "Wagered amount in bonus."
+        tests:
+          - positive_value
+      - name: "`Cash winnings`"
+        description: "Result amount in cash."
+        tests:
+          - positive_value
+      - name: "`Bonus winnings`"
+        description: "Result amount in bonus."
+        tests:
+          - positive_value

@@ -2,6 +2,7 @@
     materialized='table'
 ) }}
 
+{{ log_message('Starting execution of dim_game model.', level='info') }}
 SELECT
     sg.game_id,
     sg.game_name,
@@ -13,3 +14,6 @@ LEFT JOIN
     {{ ref('src_game_category') }} AS sgc ON sg.game_id = sgc.game_id
 LEFT JOIN
     {{ ref('src_game_provider') }} AS sgp ON sg.game_provider_id = sgp.game_provider_id
+
+
+{{ log_message('Finished execution of dim_game model.', level='info') }}
